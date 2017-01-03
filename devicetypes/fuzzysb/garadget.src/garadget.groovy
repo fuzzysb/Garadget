@@ -12,6 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ * 03/01/2017 V1.5 created an initial poll function to correct issue when immediatly using the device before the first refresh takes place.
  * 22/07/2016 V1.4 updated with "Garage Door Control" capability with thanks to Nick Jones, also have improved the open command to refresh status again after door motion timeframe has elapsed
  * 12/02/2016 V1.3 updated with to remove token and DeviceId parameters from inputs to retrieving from dni
  */
@@ -125,10 +126,9 @@ def poll() {
 
 def refresh() {
 	log.debug "Executing 'refresh'"
-    statusCommand()
     netConfigCommand()
     doorConfigCommand()
-    
+    statusCommand()
 }
 
 def configure() {
@@ -336,23 +336,27 @@ private sendCommand(method, args = []) {
 
 
 def on() {
+	def motorTime = (state.mtt).toInteger()
 	log.debug "Executing 'on'"
+    log.debug "Motor Time = ${motorTime}"
 	openCommand()
     def cmds = [
     statusCommand(),
 	statusCommand()
     ]
-    delayBetween(cmds, (state.mtt).toInteger())
+    delayBetween(cmds, motorTime)
 }
 
 def off() {
+	def motorTime = (state.mtt).toInteger()
 	log.debug "Executing 'off'"
+    log.debug "Motor Time = ${motorTime}"
 	closeCommand()
     def cmds = [
     statusCommand(),
 	statusCommand()
     ]
-    delayBetween(cmds, (state.mtt).toInteger())
+    delayBetween(cmds, motorTime)
 }
 
 def stop(){
