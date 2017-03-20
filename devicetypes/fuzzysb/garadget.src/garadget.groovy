@@ -12,12 +12,12 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
- * 03/01/2017 V1.5 created an initial poll function to correct issue when immediatly using the device before the first refresh takes place.
+ * 20/03/2016 V1.5 updated to refresh the garadget devices every 1 minute which is the minimum schedule allowed in ST
  * 22/07/2016 V1.4 updated with "Garage Door Control" capability with thanks to Nick Jones, also have improved the open command to refresh status again after door motion timeframe has elapsed
  * 12/02/2016 V1.3 updated with to remove token and DeviceId parameters from inputs to retrieving from dni
  */
- 
- 
+
+
 import groovy.json.JsonOutput
 
 preferences {
@@ -29,12 +29,12 @@ preferences {
 	input("psrt", "text", title: "reflection threshold below which the door is considered open (default: 25)")
 	input("paot", "text", title: "alert for open timeout in seconds (default: 320)")
 	input("pans", "text", title: " alert for night time start in minutes from midnight (default: 1320)")
-	input("pane", "text", title: " alert for night time end in minutes from midnight (default: 360)")	
+	input("pane", "text", title: " alert for night time end in minutes from midnight (default: 360)")
 }
 
 metadata {
 	definition (name: "Garadget", namespace: "fuzzysb", author: "Stuart Buchanan") {
-			
+
         capability "Switch"
 		capability "Contact Sensor"
         capability "Signal Strength"
@@ -44,14 +44,14 @@ metadata {
         capability "Polling"
 		capability "Configuration"
 		capability "Garage Door Control"
-		
+
         attribute "reflection", "string"
         attribute "status", "string"
         attribute "time", "string"
         attribute "lastAction", "string"
         attribute "reflection", "string"
         attribute "ver", "string"
-		
+
         command "stop"
 		command "statusCommand"
 		command "setConfigCommand"
@@ -60,7 +60,7 @@ metadata {
 	}
 
 	simulator {
-		
+
 	}
 
 tiles(scale: 2) {
@@ -99,7 +99,7 @@ tiles(scale: 2) {
         }
     standardTile("stop", "stop") {
         	state "default", label:"", action: "stop", icon:"http://cdn.device-icons.smartthings.com/sonos/stop-btn@2x.png"
-        }   
+        }
     valueTile("ip", "ip", decoration: "flat", width: 2, height: 1) {
     		state "ip", label:'IP Address\r\n${currentValue}'
 		}
@@ -112,7 +112,7 @@ tiles(scale: 2) {
 	standardTile("configure", "device.button", width: 1, height: 1, decoration: "flat") {
         	state "default", label: "", backgroundColor: "#ffffff", action: "configure", icon:"st.secondary.configure"
 		}
-        
+
         main "status"
 		details(["status", "contact", "reflection", "ver", "configure", "lastAction", "rssi", "stop", "ip", "ssid", "refresh"])
 	}
@@ -126,14 +126,15 @@ def poll() {
 
 def refresh() {
 	log.debug "Executing 'refresh'"
+    statusCommand()
     netConfigCommand()
     doorConfigCommand()
-    statusCommand()
+
 }
 
 def configure() {
 	log.debug "Resetting Sensor Parameters to SmartThings Compatible Defaults"
-	SetConfigCommand()	
+	SetConfigCommand()
 }
 
 // Parse incoming device messages to generate events
@@ -158,7 +159,7 @@ private parseDoorStatusResponse(resp) {
         sendEvent(name: 'reflection', value: sensor)
         def signal = signalvalues[1]
         sendEvent(name: 'rssi', value: signal)
-        
+
     }else if(resp.status == 201){
         log.debug("Something was created/updated")
     }
@@ -185,7 +186,7 @@ private parseDoorConfigResponse(resp) {
         log.debug("Firmware Version: "+ver)
         def rdt = rdtvalues[1]
         log.debug("Sensor Scan Interval (ms): "+rdt )
-        def mtt = mttvalues[1]    
+        def mtt = mttvalues[1]
         state.mtt = mtt
         log.debug("Door Moving Time (ms): "+state.mtt )
         def rlt = rltvalues[1]
@@ -202,7 +203,7 @@ private parseDoorConfigResponse(resp) {
         log.debug("alert for night time start in minutes from midnight: "+ans )
         def ane = anevalues[1]
         log.debug("alert for night time end in minutes from midnight: "+ane )
-        
+
     }else if(resp.status == 201){
         log.debug("Something was created/updated")
     }
@@ -244,7 +245,7 @@ private parseResponse(resp) {
         def id = resp.data.id
         def name = resp.data.name
         def connected = resp.data.connected
-		def returnValue = resp.data.return_value	
+		def returnValue = resp.data.return_value
     }else if(resp.status == 201){
         log.debug("Something was created/updated")
     }
@@ -258,35 +259,35 @@ return fullDni
 private sendCommand(method, args = []) {
 	def DefaultUri = "https://api.particle.io"
     def cdni = getDeviceDetails().tokenize(':')
-	def deviceId = cdni[0] 
+	def deviceId = cdni[0]
 	def token = cdni[1]
     def methods = [
 		'doorStatus': [
 					uri: "${DefaultUri}",
 					path: "/v1/devices/${deviceId}/doorStatus",
 					requestContentType: "application/json",
-					query: [access_token: token]  
+					query: [access_token: token]
                     ],
         'doorConfig': [
 					uri: "${DefaultUri}",
 					path: "/v1/devices/${deviceId}/doorConfig",
 					requestContentType: "application/json",
-					query: [access_token: token] 
+					query: [access_token: token]
                     ],
-		'netConfig': [	
+		'netConfig': [
 					uri: "${DefaultUri}",
 					path: "/v1/devices/${deviceId}/netConfig",
 					requestContentType: "application/json",
 					query: [access_token: token]
                    	],
-		'setState': [	
+		'setState': [
 					uri: "${DefaultUri}",
 					path: "/v1/devices/${deviceId}/setState",
 					requestContentType: "application/json",
                     query: [access_token: token],
 					body: args[0]
                    	],
-		'setConfig': [	
+		'setConfig': [
 					uri: "${DefaultUri}",
 					path: "/v1/devices/${deviceId}/setConfig",
 					requestContentType: "application/json",
@@ -296,34 +297,34 @@ private sendCommand(method, args = []) {
 	]
 
 	def request = methods.getAt(method)
-    
+
     log.debug "Http Params ("+request+")"
-    
+
     try{
         log.debug "Executing 'sendCommand'"
-        
+
         if (method == "doorStatus"){
-            httpGet(request) { resp ->            
+            httpGet(request) { resp ->
                 parseDoorStatusResponse(resp)
             }
         }else if (method == "doorConfig"){
 			log.debug "calling doorConfig Method"
-            httpGet(request) { resp ->            
+            httpGet(request) { resp ->
                 parseDoorConfigResponse(resp)
             }
 		}else if (method == "netConfig"){
 			log.debug "calling netConfig Method"
-            httpGet(request) { resp ->            
+            httpGet(request) { resp ->
                 parseNetConfigResponse(resp)
             }
         }else if (method == "setState"){
             log.debug "calling setState Method"
-            httpPost(request) { resp ->            
+            httpPost(request) { resp ->
                 parseResponse(resp)
 			}
         }else if (method == "setConfig"){
             log.debug "calling setState Method"
-            httpPost(request) { resp ->            
+            httpPost(request) { resp ->
                  parseResponse(resp)
             }
         }else{
@@ -336,27 +337,23 @@ private sendCommand(method, args = []) {
 
 
 def on() {
-	def motorTime = (state.mtt).toInteger()
 	log.debug "Executing 'on'"
-    log.debug "Motor Time = ${motorTime}"
 	openCommand()
     def cmds = [
     statusCommand(),
 	statusCommand()
     ]
-    delayBetween(cmds, motorTime)
+    delayBetween(cmds, (state.mtt).toInteger())
 }
 
 def off() {
-	def motorTime = (state.mtt).toInteger()
 	log.debug "Executing 'off'"
-    log.debug "Motor Time = ${motorTime}"
 	closeCommand()
     def cmds = [
     statusCommand(),
 	statusCommand()
     ]
-    delayBetween(cmds, motorTime)
+    delayBetween(cmds, (state.mtt).toInteger())
 }
 
 def stop(){
