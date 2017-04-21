@@ -17,7 +17,7 @@
  * 13/02/2016 V1.1 added the correct call for API url for EU/US servers, left to do: cleanup child devices when removed from setup 
  * 12/02/2016 V1.0 initial release, left to do: cleanup child devices when removed from setup 
  */
-  
+ import java.net.URLEncoder
  import java.text.DecimalFormat
  import groovy.json.JsonSlurper
  import groovy.json.JsonOutput
