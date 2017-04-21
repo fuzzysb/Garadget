@@ -12,6 +12,8 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ * 21/04/2017 V1.3 added url encoding to username and password for when special characters are used, with thanks to pastygangster
+ * 20/03/2017 V1.2 updated to refresh the garadget devices every 1 minute which is the minimum schedule allowed in ST
  * 13/02/2016 V1.1 added the correct call for API url for EU/US servers, left to do: cleanup child devices when removed from setup 
  * 12/02/2016 V1.0 initial release, left to do: cleanup child devices when removed from setup 
  */
@@ -303,7 +305,9 @@ def initialize() {
 
 def getToken(garadgetUsername, garadgetPassword){
 	log.debug "Executing 'sendCommand.setState'"
-    def body = ("grant_type=password&username=${garadgetUsername}&password=${garadgetPassword}&expires_in=0")
+    def encodedUsername = URLEncoder.encode(garadgetUsername, "UTF-8") 
+ 	def encodedPassword = URLEncoder.encode(garadgetPassword, "UTF-8")
+    def body = ("grant_type=password&username=${encodedUsername}&password=${encodedPassword}&expires_in=0")
 	sendCommand("createToken","particle","particle", body)
 }
 
