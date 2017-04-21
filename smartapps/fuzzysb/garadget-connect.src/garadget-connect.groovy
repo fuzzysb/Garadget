@@ -18,6 +18,7 @@
  */
   
  import java.text.DecimalFormat
+ import java.net.URLEncoder
  import groovy.json.JsonSlurper
  import groovy.json.JsonOutput
 
@@ -304,7 +305,9 @@ def initialize() {
 
 def getToken(garadgetUsername, garadgetPassword){
 	log.debug "Executing 'sendCommand.setState'"
-    def body = ("grant_type=password&username=${garadgetUsername}&password=${garadgetPassword}&expires_in=0")
+	def encodedUsername = URLEncoder.encode(garadgetUsername, "UTF-8") 
+	def encodedPassword = URLEncoder.encode(garadgetPassword, "UTF-8")
+    def body = ("grant_type=password&username=${encodedUsername}&password=${encodedPassword}&expires_in=0")
 	sendCommand("createToken","particle","particle", body)
 }
 
