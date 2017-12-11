@@ -14,14 +14,14 @@
  *
  * 21/04/2017 V1.3 added url encoding to username and password for when special characters are used, with thanks to pastygangster
  * 20/03/2017 V1.2 updated to refresh the garadget devices every 1 minute which is the minimum schedule allowed in ST
- * 13/02/2016 V1.1 added the correct call for API url for EU/US servers, left to do: cleanup child devices when removed from setup 
- * 12/02/2016 V1.0 initial release, left to do: cleanup child devices when removed from setup 
+ * 13/02/2016 V1.1 added the correct call for API url for EU/US servers, left to do: cleanup child devices when removed from setup
+ * 12/02/2016 V1.0 initial release, left to do: cleanup child devices when removed from setup
  */
  import java.net.URLEncoder
  import java.text.DecimalFormat
  import groovy.json.JsonSlurper
  import groovy.json.JsonOutput
- 
+
 private apiUrl() 			{ "https://api.particle.io" }
 private getVendorName() 	{ "Garadget" }
 private getVendorTokenPath(){ "https://api.particle.io/oauth/token" }
@@ -30,7 +30,7 @@ private getClientId() 		{ appSettings.clientId }
 private getClientSecret() 	{ appSettings.clientSecret }
 private getServerUrl() 		{ if(!appSettings.serverUrl){return getApiServerUrl()} }
 
- 
+
  // Automatically generated. Make future change here.
 definition(
     name: "Garadget (Connect)",
@@ -38,7 +38,7 @@ definition(
     author: "Stuart Buchanan",
     description: "Garadget Integration",
     category: "SmartThings Labs",
-	iconUrl:   "https://dl.dropboxusercontent.com/s/lkrub180btbltm8/garadget_128.png", 
+	iconUrl:   "https://dl.dropboxusercontent.com/s/lkrub180btbltm8/garadget_128.png",
 	iconX2Url: "https://dl.dropboxusercontent.com/s/w8tvaedewwq56kr/garadget_256.png",
 	iconX3Url: "https://dl.dropboxusercontent.com/s/5hiec37e0y5py06/garadget_512.png",
     oauth: true,
@@ -50,10 +50,10 @@ definition(
 preferences {
 	page(name: "startPage", title: "Garadget Integration", content: "startPage", install: false)
 	page(name: "Credentials", title: "Fetch OAuth2 Credentials", content: "authPage", install: false)
-    page(name: "mainPage", title: "Garadget Integration", content: "mainPage")
-    page(name: "completePage", title: "${getVendorName()} is now connected to SmartThings!", content: "completePage")
+  page(name: "mainPage", title: "Garadget Integration", content: "mainPage")
+  page(name: "completePage", title: "${getVendorName()} is now connected to SmartThings!", content: "completePage")
 	page(name: "listDevices", title: "Garadget Devices", content: "listDevices", install: false)
-    page(name: "badCredentials", title: "Invalid Credentials", content: "badAuthPage", install: false)
+  page(name: "badCredentials", title: "Invalid Credentials", content: "badAuthPage", install: false)
 }
 
 mappings {
@@ -66,15 +66,15 @@ def startPage() {
 }
 
 def mainPage(){
-	
+
 	def result = [success:false]
-    
-    
+
+
 	if (!state.garadgetAccessToken) {
     	createAccessToken()
        	log.debug "About to create Smarthings Garadget access token."
         getToken(garadgetUsername, garadgetPassword)
-    } 
+    }
     if (state.garadgetAccessToken){
     	result.success = true
     }
@@ -105,13 +105,13 @@ def badAuthPage(){
            		}
             }
 }
-    
+
 def authPage() {
 	log.debug "In authPage"
 	if(canInstallLabs()) {
 		def description = null
 
-		
+
 			log.debug "Prompting for Auth Details."
 
 			description = "Tap to enter Credentials."
@@ -241,14 +241,14 @@ def receivedToken() {
 
 def getDeviceList() {
 	def garadgetDevices = []
-    
+
     httpGet( apiUrl() + "/v1/devices?access_token=${state.garadgetAccessToken}"){ resp ->
     	def restDevices = resp.data
 		restDevices.each { garadget ->
         	if (garadget.connected == true)
                 garadgetDevices << ["${garadget.id}|${garadget.name}":"${garadget.name}"]
-            }			
-        	
+            }
+
 	}
 	return garadgetDevices.sort()
 
@@ -272,7 +272,7 @@ def uninstalled() {
   deleteToken()
   removeChildDevices(getChildDevices())
   log.debug "Garadget (Connect) Uninstalled"
-  
+
 }
 
 def initialize() {
@@ -285,7 +285,7 @@ def initialize() {
     	def item = device.tokenize('|')
         def deviceId = item[0]
         def deviceName = item[1]
-        def existingDevices = children.find{ d -> d.deviceNetworkId.contains(deviceId) } 
+        def existingDevices = children.find{ d -> d.deviceNetworkId.contains(deviceId) }
     		if(!existingDevices) {
 				try {
 					createChildDevice("Garadget", deviceId + ":" + state.garadgetAccessToken, "${deviceName}", deviceName)
@@ -293,19 +293,19 @@ def initialize() {
 					log.error "Error creating device: ${e}"
 				}
     		}
-		}	
+		}
     }
-   
-    
+
+
 	// Do the initial poll
 	poll()
-	// Schedule it to run every 5 minutes
-	runEvery5Minutes("poll")
+	// Schedule it to run every 1 minutes
+	runEvery1Minutes("poll")
 }
 
 def getToken(garadgetUsername, garadgetPassword){
 	log.debug "Executing 'sendCommand.setState'"
-    def encodedUsername = URLEncoder.encode(garadgetUsername, "UTF-8") 
+    def encodedUsername = URLEncoder.encode(garadgetUsername, "UTF-8")
  	def encodedPassword = URLEncoder.encode(garadgetPassword, "UTF-8")
     def body = ("grant_type=password&username=${encodedUsername}&password=${encodedPassword}&expires_in=0")
 	sendCommand("createToken","particle","particle", body)
@@ -319,33 +319,33 @@ private sendCommand(method, user, pass, command) {
 	def methods = [
 			'createToken': [
         				uri: getVendorTokenPath(),
-            			requestContentType: "application/x-www-form-urlencoded", 
+            			requestContentType: "application/x-www-form-urlencoded",
                         headers: headers,
                 	    body: command
                     	],
             'deleteToken': [
         				uri: apiUrl() + "/v1/access_tokens/${state.garadgetAccessToken}",
-            			requestContentType: "application/x-www-form-urlencoded", 
+            			requestContentType: "application/x-www-form-urlencoded",
                         headers: headers,
                     	]
                    ]
 	def request = methods.getAt(method)
 	log.debug "Http Params ("+request+")"
-		
+
     try{
         if (method == "createToken"){
-        	log.debug "Executing createToken 'sendCommand'" 
-            httpPost(request) { resp ->            
+        	log.debug "Executing createToken 'sendCommand'"
+            httpPost(request) { resp ->
                 parseResponse(resp)
             }
         }else if (method == "deleteToken"){
-        	log.debug "Executing deleteToken 'sendCommand'" 
-            httpDelete(request) { resp ->            
+        	log.debug "Executing deleteToken 'sendCommand'"
+            httpDelete(request) { resp ->
                 parseResponse(resp)
             }
         }else{
-        log.debug "Executing default HttpGet 'sendCommand'"       
-            httpGet(request) { resp ->            
+        log.debug "Executing default HttpGet 'sendCommand'"
+            httpGet(request) { resp ->
                 parseResponse(resp)
         }
         }
@@ -360,22 +360,22 @@ private parseResponse(resp) {
     log.debug("Output status: "+resp.status)
     if(resp.status == 200) {
     	log.debug("Executing parseResponse.successTrue")
-        state.garadgetAccessToken = resp.data.access_token 
+        state.garadgetAccessToken = resp.data.access_token
         log.debug("Access Token: "+ state.garadgetAccessToken)
 		state.garadgetRefreshToken = resp.data.refresh_token
         log.debug("Refresh Token: "+ state.garadgetRefreshToken)
 		state.garadgetTokenExpires = resp.data.expires_in
         log.debug("Token Expires: "+ state.garadgetTokenExpires)
-        log.debug "Created new Garadget token"  
+        log.debug "Created new Garadget token"
     }else if(resp.status == 201){
         log.debug("Something was created/updated")
     }
 }
 
 def poll() {
-	log.debug "In Poll"
+	log.debug "Executing - Service Manager - poll() - "
 	getDeviceList();
-	getAllChildDevices().each { 
+	getAllChildDevices().each {
         it.statusCommand()
 	}
 }
