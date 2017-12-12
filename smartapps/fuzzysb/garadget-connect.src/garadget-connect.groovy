@@ -12,6 +12,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ * 12/12/2017 V1.4 debug logging changes. - btrenbeath
  * 21/04/2017 V1.3 added url encoding to username and password for when special characters are used, with thanks to pastygangster
  * 20/03/2017 V1.2 updated to refresh the garadget devices every 1 minute which is the minimum schedule allowed in ST
  * 13/02/2016 V1.1 added the correct call for API url for EU/US servers, left to do: cleanup child devices when removed from setup
