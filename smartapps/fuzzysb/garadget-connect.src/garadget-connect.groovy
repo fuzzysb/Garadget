@@ -301,7 +301,7 @@ def initialize() {
 	// Do the initial poll
 	poll()
 	// Schedule it to run every 1 minutes
-	runEvery1Minutes("poll")
+	runEvery1Minute("poll")
 }
 
 def getToken(garadgetUsername, garadgetPassword){
