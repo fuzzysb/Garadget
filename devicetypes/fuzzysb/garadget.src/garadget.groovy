@@ -170,38 +170,56 @@ private parseDoorConfigResponse(resp) {
     if(resp.status == 200) {
         log.debug("returnedresult: "+resp.data.result)
         def results = (resp.data.result).tokenize('|')
-        def vervalues = (results[0]).tokenize('=')
-        def rdtvalues = (results[1]).tokenize('=')
-        def mttvalues = (results[2]).tokenize('=')
-        def rltvalues = (results[3]).tokenize('=')
-        def rlpvalues = (results[4]).tokenize('=')
-        def srrvalues = (results[5]).tokenize('=')
-        def srtvalues = (results[6]).tokenize('=')
-        def aotvalues = (results[7]).tokenize('=')
-        def ansvalues = (results[8]).tokenize('=')
-        def anevalues = (results[9]).tokenize('=')
-        def ver = vervalues[1]
-        sendEvent(name: 'ver', value: ver, displayed: false)
-        log.debug("Firmware Version: "+ver)
-        def rdt = rdtvalues[1]
-        log.debug("Sensor Scan Interval (ms): "+rdt )
-        def mtt = mttvalues[1]
-        state.mtt = mtt
-        log.debug("Door Moving Time (ms): "+state.mtt )
-        def rlt = rltvalues[1]
-        log.debug("Button Press Time (ms): "+rlt )
-        def rlp = rlpvalues[1]
-        log.debug("Delay Between Consecutive Button Presses (ms): "+rlp )
-        def srr = srrvalues[1]
-        log.debug("number of sensor reads used in averaging: "+srr )
-        def srt = srtvalues[1]
-        log.debug("reflection threshold below which the door is considered open: "+srt )
-        def aot = aotvalues[1]
-        log.debug("alert for open timeout in seconds: "+aot )
-        def ans = ansvalues[1]
-        log.debug("alert for night time start in minutes from midnight: "+ans )
-        def ane = anevalues[1]
-        log.debug("alert for night time end in minutes from midnight: "+ane )
+
+    		results.each { value ->
+            	def resultValue = value.tokenize('=')
+                switch (resultValue[0]) {
+                	case "ver": def ver = resultValue[1];
+                    			log.debug ("GARADGET: Firmware Version (ver): " +ver);
+                    			sendEvent(name: 'ver', value: ver, displayed: false);
+                                break;
+
+                    case "rdt": def rdt = resultValue[1];
+                    			log.debug ("GARADGET: Sensor Scan Interval (rdt): " +rdt);
+                                break;
+
+                    case "mtt": def mtt = resultValue[1];
+                    			state.mtt = mtt;
+                                log.debug ("GARADGET: Door Moving Time (mtt): " +mtt);
+                                break;
+
+                    case "rlt": def rlt = resultValue[1];
+                    			log.debug ("GARADGET: Button Press time (rlt): " +rlt);
+                                break;
+
+                    case "rlp": def rlp = resultValue[1];
+                    			log.debug ("GARADGET: Delay Between Consecutive Button Presses (rlp)" +rlp);
+                                break;
+
+                    case "srr": def srr = resultValue[1];
+                    			log.debug ("GARADGET: Number of Sensor Feeds used in Averaging: " +srr);
+                                break;
+
+                    case "srt": def srt = resultValue[1];
+                    			log.debug ("GARADGET: Reflection Value below which door is 'open': " +srt);
+                                break;
+
+                    case "aot": def aot = resultValue[1];
+                    			log.debug ("GARADGET: Alert for Open Timeout in seconds: " +aot);
+                                break;
+
+                    case "ans": def ans = resultValue[1];
+                    			log.debug ("GARADGET: Alert for night time start in minutes from midnight: " +ans);
+                                break;
+
+                    case "ane": def ane = resultValue[1];
+                    			log.debug ("GARADGET: Alert for night time end in minutes from midnight: " +ane );
+                                break;
+
+                    default : log.debug ("GARADGET UNUSED CONFIG: " +resultValue[0] +" value of " +resultValue[1])
+                }
+            }
+
 
     }else if(resp.status == 201){
         log.debug("Something was created/updated")
