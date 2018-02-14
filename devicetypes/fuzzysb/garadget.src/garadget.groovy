@@ -2,7 +2,9 @@
  *  Garadget Device Handler
  *
  *  Copyright 2016 Stuart Buchanan based loosely based on original code by Krishnaraj Varma with thanks
- *
+ *  Additional contribution by:
+ *   - RBoy
+ *   - btrenbeath
  *  Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except
  *  in compliance with the License. You may obtain a copy of the License at:
  *
@@ -12,6 +14,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ * 14/02/2018 V1.7 Support Door Control capability for expanded compatibility with SmartApps -RBoy
  * 04/02/2018 V1.6 Updated Door Status response parsing to be more resilient to changes in format from Garadget, and fixed bug resulting from latest Garadget response format change. -btrenbeath
  * 12/12/2017 V1.5 UPDATED - Changed the route to immediately update send the 'Closing' status regardless of what the Garget device reads. Also changed the mechanism used to wait on the 'opening' delay to utilize 'runOnce' instead of 'delayBetween', since delayBetween is broken in the SmartThings SDK.  I added 2000 miliseconds to the wait time configured in Garadget for the device to account for lag and delay in SmartThings execution. - btrenbeath
  * 22/07/2016 V1.4 updated with "Garage Door Control" capability with thanks to Nick Jones, also have improved the open command to refresh status again after door motion timeframe has elapsed
@@ -45,6 +48,7 @@ metadata {
     capability "Polling"
 		capability "Configuration"
 		capability "Garage Door Control"
+		capability "Door Control"
 
     attribute "reflection", "string"
     attribute "status", "string"
