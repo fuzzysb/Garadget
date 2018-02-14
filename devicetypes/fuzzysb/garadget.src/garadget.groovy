@@ -45,6 +45,7 @@ metadata {
     capability "Polling"
 		capability "Configuration"
 		capability "Garage Door Control"
+		capability "Door Control"
 
     attribute "reflection", "string"
     attribute "status", "string"
