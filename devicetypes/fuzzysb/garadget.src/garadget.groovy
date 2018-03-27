@@ -14,6 +14,7 @@
  *  on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License
  *  for the specific language governing permissions and limitations under the License.
  *
+ * 21/03/2018 V1.8 Report Door Control and Garage Door Control state -RBoy
  * 14/02/2018 V1.7 Support Door Control capability for expanded compatibility with SmartApps -RBoy
  * 04/02/2018 V1.6 Updated Door Status response parsing to be more resilient to changes in format from Garadget, and fixed bug resulting from latest Garadget response format change. -btrenbeath
  * 12/12/2017 V1.5 UPDATED - Changed the route to immediately update send the 'Closing' status regardless of what the Garget device reads. Also changed the mechanism used to wait on the 'opening' delay to utilize 'runOnce' instead of 'delayBetween', since delayBetween is broken in the SmartThings SDK.  I added 2000 miliseconds to the wait time configured in Garadget for the device to account for lag and delay in SmartThings execution. - btrenbeath
@@ -157,6 +158,7 @@ private parseDoorStatusResponse(resp) {
         sendEvent(name: 'status', value: status)
         if(status == "open" || status == "closed"){
         	sendEvent(name: 'contact', value: status, displayed: false)
+		sendEvent(name: 'door', value: status, displayed: false)
             }
         def time = timevalues[1]
         sendEvent(name: 'lastAction', value: time)
@@ -377,6 +379,7 @@ def on() {
     log.debug ("TimeStamp - on() - +15: "+laterTime)
 
  	sendEvent(name: 'status', value: 'opening')
+	sendEvent(name: 'door', value: 'opening')
     log.debug ("Executing - on() - SendEvent opening")
 
     runOnce(laterTime, statusCommand, [overwrite: false])
@@ -400,6 +403,7 @@ def off() {
     log.debug ("TimeStamp - off() - +15: "+laterTime)
 
     sendEvent(name: 'status', value: 'closing')
+    sendEvent(name: 'door', value: 'closing')
     log.debug ("Executing - off() - SendEvent closing")
 
     runOnce(laterTime, statusCommand, [overwrite: false])
