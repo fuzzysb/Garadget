@@ -38,18 +38,24 @@ preferences {
 }
 
 metadata {
-	definition (name: "Garadget", namespace: "fuzzysb", author: "Stuart Buchanan") {
+
+	definition (name: "Garadget", 
+    			namespace: "fuzzysb", 
+                author: "Stuart Buchanan", 
+              	vid: "generic-contact-4", 
+                ocfDeviceType: "oic.d.garagedoor",
+                mnmn: "SmartThings") {
 
     capability "Switch"
-		capability "Contact Sensor"
+	capability "Contact Sensor"
     capability "Signal Strength"
-		capability "Actuator"
-		capability "Sensor"
+	capability "Actuator"
+	capability "Sensor"
     capability "Refresh"
     capability "Polling"
-		capability "Configuration"
-		capability "Garage Door Control"
-		capability "Door Control"
+	capability "Configuration"
+	capability "Garage Door Control"
+	capability "Door Control"
 
     attribute "reflection", "string"
     attribute "status", "string"
@@ -59,10 +65,10 @@ metadata {
     attribute "ver", "string"
 
     command "stop"
-		command "statusCommand"
-		command "setConfigCommand"
-		command "doorConfigCommand"
-		command "netConfigCommand"
+	command "statusCommand"
+	command "setConfigCommand"
+	command "doorConfigCommand"
+	command "netConfigCommand"
 	}
 
 	simulator {
